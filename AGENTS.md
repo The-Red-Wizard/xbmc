@@ -85,3 +85,26 @@ Review the final diff as a human reviewer would.
 * Check that tests are proportional to the change and test the intended behavior.
 * Confirm that no speculative edge-case handling substantially expanded the implementation.
 * Confirm that every changed file is necessary for the task.
+
+## Building on Ubuntu 24.04
+
+Cloud Agents use Ubuntu 24.04. The image has the Linux build dependencies from `docs/README.Ubuntu.md`, plus SWIG 4.5.0 at `/usr/local/bin/swig`. `cc` and `c++` are GCC.
+
+Use internal FFmpeg, FlatBuffers, and fmt. Ubuntu 24.04's packages are older than the versions this tree requires, and the FFmpeg check stops configure:
+
+```
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DAPP_RENDER_SYSTEM=gl \
+  -DENABLE_INTERNAL_FFMPEG=ON -DENABLE_INTERNAL_FLATBUFFERS=ON \
+  -DENABLE_INTERNAL_FMT=ON
+cmake --build build -j$(nproc)
+```
+
+The default windowing platforms are X11, Wayland, and GBM. Internal fmt also builds spdlog. From the build directory:
+
+```
+./kodi.bin --version
+cmake --build . --target kodi-test
+./kodi-test
+```
+
+Ubuntu's libCEC 6.0 is older than the 8.1 requirement, so CEC stays off unless you also pass `-DENABLE_INTERNAL_CEC=ON`.
